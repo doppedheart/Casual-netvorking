@@ -2,6 +2,14 @@ const multer = require("multer");
 const path = require("path");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require("fs");
+var firebaseAdmin = require("firebase-admin");
+
+var serviceAccount = require("./serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 const client = new S3Client({
   region: "ap-south-1",
   credentials: {
@@ -49,4 +57,8 @@ const isLoggedin = (req, res, next) => {
   next();
 };
 
-module.exports = { upload, uploadToS3, isLoggedin };
+// const sendNotification = async(deviceToken, message){
+
+// };
+
+module.exports = { upload, uploadToS3, isLoggedin, firebaseAdmin };
