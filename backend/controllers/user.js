@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const FCM = require("../models/fcm");
 const Hackathon = require("../models/hackathon");
 const turf = require("@turf/turf");
 
@@ -38,23 +39,6 @@ const signup = async (data, images) => {
     return { success: false, message: "Internal Server error", data: null };
   }
 };
-// const signupFirebase = async (uid) => {
-//   try {
-//     firebaseAdmin
-//       .auth()
-//       .getUser(uid)
-//       .then(function (userRecord) {
-//         console.log("Successfully fetched user data:", userRecord.toJSON());
-//         return { message: "User added to Database" };
-//       })
-//       .catch(function (error) {
-//         console.log("Error fetching user data:", error);
-//         return "Error fetching user data";
-//       });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
 const getAllUsers = async () => {
   try {
     const users = await User.find({});
@@ -83,6 +67,35 @@ const updateUser = async (id, data) => {
       success: true,
       message: "User updated successfully",
       data: user,
+    };
+  } catch (error) {
+    return { success: false, message: "Internal Server error", data: null };
+  }
+};
+const updateImage = async (id, image) => {
+  try {
+    let avatar = { url: "" };
+    if (image.length !== 0) {
+      const image = image[0].originalname;
+      const filename =
+        image.split(".")[0] + "_" + Date.now() + "." + image.split(".")[1];
+      avatar = await uploadToS3(
+        process.env.S3_BUCKET_NAME,
+        filename,
+        image[0].path,
+        image[0].mimetype
+      );
+      console.log(avatar.url);
+    }
+    const user = await User.findByIdAndUpdate(
+      id,
+      { avatar: avatar.url },
+      { new: true }
+    );
+    return {
+      success: true,
+      message: "Image successfully updated",
+      data: avatar.url,
     };
   } catch (error) {
     return { success: false, message: "Internal Server error", data: null };
@@ -119,23 +132,6 @@ const recommendations = async (userId) => {
     console.log(err);
     return { success: false, message: "Internal Server error", data: null };
   }
-};
-
-const sendRequest = async () => {
-  console.log("sendRequest");
-  const sendNotification = async (uid, deviceToken, message) => {
-    const user = User.findById(uid);
-    const name = user.username || user.email;
-    const payload = {
-      notification: {
-        title: "Connection Request",
-        subtitle: `from ${name}`,
-        body: message,
-      },
-      token: deviceToken,
-    };
-  };
-  return { message: "connection request send" };
 };
 
 const acceptRequest = async () => {};
@@ -197,11 +193,12 @@ const findHackathon = async (id, lat, long) => {
 };
 module.exports = {
   signup,
-  // signupFirebase,
   getUser,
   updateUser,
+  updateImage,
   getAllUsers,
   updateLocation,
   sendRequest,
   recommendations,
+  fcmStore,
 };
