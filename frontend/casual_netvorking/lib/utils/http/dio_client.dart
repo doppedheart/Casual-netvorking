@@ -2,8 +2,8 @@ import 'package:dio/dio.dart' as dio;
 
 import 'package:get/get.dart';
 
+
 import '../../config/dio/dio_conifg.dart';
-import '../../states/user_state.dart';
 import '../api/token_api.dart';
 import '../exceptions/dio_exception.dart';
 
