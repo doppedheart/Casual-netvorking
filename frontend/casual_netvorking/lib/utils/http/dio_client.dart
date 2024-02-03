@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import '../../config/dio/dio_conifg.dart';
 import '../../states/user_state.dart';
-import '../api/token_api.dart';
 import '../exceptions/dio_exception.dart';
 
 class TDioClient extends GetxController {
@@ -33,25 +32,9 @@ class TDioClient extends GetxController {
         (dio.DioException e, dio.ErrorInterceptorHandler handler) async {
       if (e.response?.statusCode == 401) {
         // get new access token
-        final tokenApi = TokenApi.instance;
         final userState = UserState.instance;
         final refreshToken = userState.refreshToken!;
-        final newAccessToken = await tokenApi.getNewAccessToken(
-          refreshToken,
-        );
 
-
-      if(newAccessToken==null||newAccessToken.isEmpty){
-          //remove user from local storage
-        userState.removeUser();
-        //remove user from app
-        userState.removeUser();
-        //redirect to login page
-        Get.offAllNamed('/login');
-      }
-      //update new accessToken in local Storage 
-      userState.updateAccessToken(newAccessToken!);
-        addAcessTokenToHeader(newAccessToken);
 
         // retry failed request
         handler.resolve(await dioClient.dio.request(
