@@ -17,7 +17,7 @@ class TImages {
 
   //-- Welcome Screen Images
   static const String welcomeScreenImg =
-      "assets/img/Designer__3_-removebg-preview (1).png";
+      "assets/img/svg/appicon.jpg";
 
   //---------------Login images----------
 
