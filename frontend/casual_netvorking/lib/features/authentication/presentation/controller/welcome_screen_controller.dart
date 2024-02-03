@@ -1,11 +1,11 @@
-import 'package:causual_networking/feature/authentication/presentation/screens/on_boarding_screen/onboarding_screen.dart';
 import 'package:get/get.dart';
 
-import '../../../../common/screen/no_internet_screen.dart';
 import '../../../../navigation_menu.dart';
+import '../../../../screen/no_internet_screen.dart';
 import '../../../../states/user_state.dart';
 import '../../../../utils/helpers/network_manager.dart';
 import '../../application/service/authentication_service_impl.dart';
+import '../screens/on_boarding_screen/onboarding_screen.dart';
 
 
 class WelcomeScreenController extends GetxController {

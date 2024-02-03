@@ -1,10 +1,10 @@
-import 'package:causual_networking/feature/authentication/presentation/screens/user_details/add_user_deatails_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../../utils/constants/colors.dart';
 import '../../../../../../utils/constants/image_strings.dart';
 import '../../../../../../utils/constants/sizes.dart';
+import '../../user_details/add_user_deatails_screen.dart';
 
 class LoginFooterWidget extends StatelessWidget {
   const LoginFooterWidget({

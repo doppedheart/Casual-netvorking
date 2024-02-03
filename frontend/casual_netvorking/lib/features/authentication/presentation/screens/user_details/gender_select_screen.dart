@@ -1,4 +1,5 @@
-import 'package:causual_networking/feature/authentication/presentation/screens/user_details/select_your_intrest.dart';
+
+import 'package:casual_netvorking/features/authentication/presentation/screens/user_details/select_your_intrest.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
