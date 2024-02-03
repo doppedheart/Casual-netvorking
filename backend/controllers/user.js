@@ -1,6 +1,6 @@
 const User = require("../models/user");
 const { uploadToS3 } = require("../middleware");
-const {firebaseAdmin} = require("../middleware")
+const { firebaseAdmin } = require("../middleware");
 const signup = async (data, images) => {
   try {
     const { username, email } = data;
@@ -31,24 +31,23 @@ const signup = async (data, images) => {
     return error;
   }
 };
-const signupFirebase = async (uid){
-    try{
-    firebaseAdmin.auth().getUser(uid)
-        .then(function(userRecord) {
-            // See the UserRecord reference doc for the contents of userRecord
-            console.log('Successfully fetched user data:', userRecord.toJSON());
-            res.status(200).send(userRecord.toJSON());
-        })
-        .catch(function(error) {
-            console.log('Error fetching user data:', error);
-            res.status(500).send('Error fetching user data');
-        });
-    }
-    catch(err){
-        console.log(err);
-    }
-
-}
+// const signupFirebase = async (uid) => {
+//   try {
+//     firebaseAdmin
+//       .auth()
+//       .getUser(uid)
+//       .then(function (userRecord) {
+//         console.log("Successfully fetched user data:", userRecord.toJSON());
+//         return { message: "User added to Database" };
+//       })
+//       .catch(function (error) {
+//         console.log("Error fetching user data:", error);
+//         return "Error fetching user data";
+//       });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
 const getAllUsers = async () => {
   try {
     const users = await User.find({});
@@ -79,10 +78,50 @@ const updateUser = async (id, data) => {
   }
 };
 
+const recommendations = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return { message: "User not found" };
+    }
+    const recommendations = await User.find({
+      "interests.occupation": { $in: userInterests.occupation },
+      "interests.frameworksAndTools": { $in: userInterests.frameworksAndTools },
+      "interests.hobbies": { $in: userInterests.hobbies },
+      "interests.companies": { $in: userInterests.companies },
+      _id: { $ne: user._id }, // Exclude the current user
+    });
+    return recommendations;
+  } catch (err) {
+    console.log(err);
+    return { message: "Error occured" };
+  }
+};
+
+const sendRequest = async () => {
+  console.log("sendRequest");
+  const sendNotification = async (uid, deviceToken, message) => {
+    const user = User.findById(uid);
+    const name = user.username || user.email;
+    const payload = {
+      notification: {
+        title: "Connection Request",
+        subtitle: `from ${name}`,
+        body: message,
+      },
+      token: deviceToken,
+    };
+  };
+  return { message: "connection request send" };
+};
+
+const acceptRequest = async () => {};
+
 module.exports = {
   signup,
-  signupFirebase,
+  //   signupFirebase,
   getUser,
   updateUser,
   getAllUsers,
+  sendRequest,
 };
