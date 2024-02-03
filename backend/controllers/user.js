@@ -1,5 +1,4 @@
 const User = require("../models/user");
-const Request = require("../models/request");
 const { uploadToS3 } = require("../middleware");
 const signup = async (data, images) => {
   try {

@@ -1,6 +1,6 @@
 // create read update and delete hackathon details option for admin
 // 4 different function
-const { sampleData } = require("../../Hackathon-Sample");
+const { sampleData } = require("../Hackathon-Sample");
 const Hackathon = require("../models/hackathon");
 
 const createHackathon = async (req, res) => {
