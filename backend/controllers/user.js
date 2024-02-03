@@ -40,7 +40,7 @@ const signup = async (data, images) => {
     return {
       success: true,
       message: "User added to Database",
-      data: { id, name, email, avatar },
+      data: { id, name, email, avatar: avatar.url },
     };
   } catch (error) {
     return { success: false, message: "Internal Server error", data: null };
