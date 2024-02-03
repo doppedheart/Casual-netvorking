@@ -1,21 +1,16 @@
 import 'package:get/get.dart';
 
-
-import '../features/authentication/data/repository/authentication_repository_impl.dart';
-import '../features/authentication/domain/entities/user.dart';
-
-
-
+import '../features/authentication/modal/user.dart';
 
 class UserState extends GetxController {
-  final Rx<User?> _authenticatedUser = Rx<User?>(null);
-  final Rx<String?> _accessToken = Rx<String?>(null);
-  final Rx<String?> _refreshToken = Rx<String?>(null);
+  final Rx<UserModal?> _authenticatedUser = Rx<UserModal?>(null);
+  final RxBool _isUserLoggedIn = false.obs;
+  final RxBool _isUserProfileComplete=false.obs;
 
-  User? get authenticatedUser => _authenticatedUser.value;
-  bool get isUserLoggedIn => _authenticatedUser.value != null;
-  String? get accessToken => _accessToken.value;
-  String? get refreshToken => _refreshToken.value;
+  UserModal? get authenticatedUser => _authenticatedUser.value;
+  bool get isUserLoggedIn => _isUserLoggedIn.value;
+  bool get isUserProfileComplete => _isUserProfileComplete.value;
+
 
   static UserState get instance {
     if (Get.isRegistered<UserState>()) {
@@ -25,25 +20,21 @@ class UserState extends GetxController {
     }
   }
 
-  void setUser(User user,String accessToken,String refreshToken) {
+  void setUser(UserModal user, ) {
     _authenticatedUser.value = user;
-    _accessToken.value = accessToken;
-    _refreshToken.value = refreshToken;
   }
 
-  void removeUser()  {
-      _authenticatedUser.value = null;
-      _accessToken.value = null;
-      _refreshToken.value = null;
+  void setLogin(bool isLogin) {
+    _isUserLoggedIn.value = isLogin;
   }
 
-  void updateAccessToken(String accessToken) {
+  void setProfileComplete(bool isProfileComplete) {
+    _isUserProfileComplete.value = isProfileComplete;
+  }
+  
 
-    final AuthenticationRepositoryImpl authenticationRepository = AuthenticationRepositoryImpl.instance;
-
-    authenticationRepository.updateAccessToken(accessToken);
-    _accessToken.value = accessToken;
+  void removeUser() {
+    _authenticatedUser.value = null;
 
   }
-
 }

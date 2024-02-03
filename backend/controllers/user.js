@@ -10,12 +10,14 @@ const signup = async (data, images) => {
     const { username, email } = data;
     let avatar = { url: "" };
     const userExists = await User.findOne({ $or: [{ username }, { email }] });
-    if (userExists)
+    if (userExists){
+      let {id , name ,avatar} = userExists;
       return {
         success: true,
-        message: "Welcome BACK ",
-        data: userExists,
+        message: "User with this email or username already exists",
+        data: {id,name,email,avatar},
       };
+    }
     if (data.avatar) {
       avatar.url = data.avatar;
     } else {
@@ -31,10 +33,11 @@ const signup = async (data, images) => {
         );
         console.log(avatar.url);
       }
-    }
+    }//{id , name , email,avatar}
     const user = new User({ avatar: avatar.url, ...data });
     await user.save();
-    return { success: true, message: "User added to Database", data: user };
+    const {id , name} = user;
+    return { success: true, message: "User added to Database", data: {id,name,email,avatar} };
   } catch (error) {
     return { success: false, message: "Internal Server error", data: null };
   }
@@ -62,12 +65,12 @@ const getUser = async (id) => {
 const updateUser = async (id, data) => {
   try {
     const user = await User.findByIdAndUpdate(id, { ...data }, { new: true });
-    if (!user) return { success: false, message: "User not found", data: null };
-    return {
-      success: true,
-      message: "User updated successfully",
-      data: user,
-    };
+    if (!user)
+      return {
+        success: true,
+        message: "User updated successfully",
+        data: null,
+      };
   } catch (error) {
     return { success: false, message: "Internal Server error", data: null };
   }

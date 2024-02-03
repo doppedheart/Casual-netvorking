@@ -55,6 +55,9 @@ dependencies:
   flutter_svg: ^2.0.9
   flutter_custom_clippers: ^2.1.0
   cached_network_image: ^3.3.1
+  flutter_web_auth: ^0.5.0
+  firebase_core: ^2.25.3
+  firebase_auth: ^4.17.3
 
 dev_dependencies:
   flutter_test:

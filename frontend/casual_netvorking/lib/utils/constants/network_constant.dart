@@ -3,7 +3,7 @@
 class NetworkConstants {
   //base url
   // static String? baseUrl = dotenv.env['baseURI'];
-  static String? baseUrl = "https://reqres.in/api";
+  static String? baseUrl = "https://casual-networking.onrender.com";
   //api version
   static const String apiVersion = "v1";
 
