@@ -7,7 +7,17 @@ const hackathonSchema = new mongoose.Schema(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     organizer: { type: String },
-    location: { type: String },
+    location: {
+      type: {
+        type: String, 
+        enum: ['Point'], 
+        default:'Point'
+      },
+      coordinates: {
+        type: [Number],
+        required: true
+      }
+    },
     registrationLink: { type: String },
     participants: {
       type: [mongoose.Schema.Types.ObjectId],
@@ -23,12 +33,17 @@ const hackathonSchema = new mongoose.Schema(
     sponsors: { type: [String] },
     judges: { type: [String] },
     prizes: { type: [String] },
+    distance: { type: Number },
   },
   {
     timestamps: true,
   }
 );
 
+hackathonSchema.index({ location: "2dsphere" });
+
 const HackathonModel = mongoose.model("Hackathon", hackathonSchema);
+//HackathonModel.createIndex({ location:"2dsphere"});
+
 
 module.exports = HackathonModel;

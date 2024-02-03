@@ -77,4 +77,6 @@ const userSchema = new mongoose.Schema(
 
 const UserModel = mongoose.model("User", userSchema);
 
+//UserModel.createIndexes({ location: "2dsphere"});
+
 module.exports = UserModel;

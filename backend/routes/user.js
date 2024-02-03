@@ -6,6 +6,7 @@ const {
   getUser,
   updateUser,
   getAllUsers,
+  updateLocation,
   sendRequest,
   recommendations,
 } = require("../controllers/user");
@@ -30,6 +31,10 @@ router.post("/signup/firebase", async (req, res) => {
 });
 router.post("/:id", async (req, res) => {
   const response = await updateUser(req.params.id, req.body);
+  res.send(response);
+});
+router.put("/updateLocation/:id", async (req, res) => {
+  const response = await updateLocation(req.params.id, req.body);
   res.send(response);
 });
 
