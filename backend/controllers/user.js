@@ -9,12 +9,14 @@ const signup = async (data, images) => {
     const { username, email } = data;
     let avatar = { url: "" };
     const userExists = await User.findOne({ $or: [{ username }, { email }] });
-    if (userExists)
+    if (userExists){
+      let {id , name ,avatar} = userExists;
       return {
         success: false,
         message: "User with this email or username already exists",
-        data: userExists,
+        data: {id,name,email,avatar},
       };
+    }
     if (data.avatar) {
       avatar.url = data.avatar;
     } else {
@@ -83,7 +85,7 @@ const updateUser = async (id, data) => {
       return {
         success: true,
         message: "User updated successfully",
-        data: user,
+        data: null,
       };
   } catch (error) {
     return { success: false, message: "Internal Server error", data: null };
