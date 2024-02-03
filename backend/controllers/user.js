@@ -120,45 +120,6 @@ const sendRequest = async () => {
 
 const acceptRequest = async () => {};
 
-const recommendations = async (userId) => {
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return { message: "User not found" };
-    }
-    const recommendations = await User.find({
-      "interests.occupation": { $in: userInterests.occupation },
-      "interests.frameworksAndTools": { $in: userInterests.frameworksAndTools },
-      "interests.hobbies": { $in: userInterests.hobbies },
-      "interests.companies": { $in: userInterests.companies },
-      _id: { $ne: user._id }, // Exclude the current user
-    });
-    return recommendations;
-  } catch (err) {
-    console.log(err);
-    return { message: "Error occured" };
-  }
-};
-
-const sendRequest = async () => {
-  console.log("sendRequest");
-  const sendNotification = async (uid, deviceToken, message) => {
-    const user = User.findById(uid);
-    const name = user.username || user.email;
-    const payload = {
-      notification: {
-        title: "Connection Request",
-        subtitle: `from ${name}`,
-        body: message,
-      },
-      token: deviceToken,
-    };
-  };
-  return { message: "connection request send" };
-};
-
-const acceptRequest = async () => {};
-
 const updateLocation = async (id, data) => {
   try {
     const { latitude, longitude } = data;
