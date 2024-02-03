@@ -2,9 +2,7 @@ import 'package:dio/dio.dart' as dio;
 
 import 'package:get/get.dart';
 
-
 import '../../config/dio/dio_conifg.dart';
-import '../../states/user_state.dart';
 import '../exceptions/dio_exception.dart';
 
 class TDioClient extends GetxController {
@@ -18,40 +16,6 @@ class TDioClient extends GetxController {
 
   // Replace with your API base URL
   final dioClient = DioClient();
-
-  final isTokenAdd = false.obs;
-  final isTokenErrorInterceptorAdded = false.obs;
-
-  void addAcessTokenToHeader(String token) {
-    dioClient.addTokenInHeader(token);
-    isTokenAdd.value = true;
-  }
-
-  void addInterceptToautomaticallyUpdateAccessToken() {
-    dioClient.addInterceptors(dio.InterceptorsWrapper(onError:
-        (dio.DioException e, dio.ErrorInterceptorHandler handler) async {
-      if (e.response?.statusCode == 401) {
-        // get new access token
-        final userState = UserState.instance;
-        final refreshToken = userState.refreshToken!;
-
-
-        // retry failed request
-        handler.resolve(await dioClient.dio.request(
-          e.requestOptions.path,
-          cancelToken: e.requestOptions.cancelToken,
-          data: e.requestOptions.data,
-          onReceiveProgress: e.requestOptions.onReceiveProgress,
-          onSendProgress: e.requestOptions.onSendProgress,
-          queryParameters: e.requestOptions.queryParameters,
-          // options: e.requestOptions,
-        ));
-      } else {
-        // Let the error "pass through" if it's not the error we're looking for
-        TDioExceptions.fromError(e);
-      }
-    }));
-  }
 
   // Helper method to make a GET request
   Future<dio.Response?> get(

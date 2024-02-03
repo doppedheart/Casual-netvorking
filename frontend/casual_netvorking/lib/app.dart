@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-
-import 'features/authentication/presentation/screens/login_screen/login_screen.dart';
-import 'features/authentication/presentation/screens/welcome/welcome_screen.dart';
+import 'features/authentication/screens/login_screen/login_screen.dart';
+import 'features/authentication/screens/welcome/welcome_screen.dart';
 import 'navigation_menu.dart';
 import 'utils/theme/theme.dart';
 
@@ -22,7 +21,7 @@ class App extends StatelessWidget {
       darkTheme: TAppTheme.darkTheme,
       routes: {
         WelcomeScreen.routeName: (context) => WelcomeScreen(),
-        LoginScreen.routeName: (context) => const LoginScreen(),
+        LoginScreen.routeName: (context) => LoginScreen(),
         TNavigationMenu.routeName: (context) => TNavigationMenu(),
       },
       // home: GetBuilder<AuthenticationServiceimpl>(
