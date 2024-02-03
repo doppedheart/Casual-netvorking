@@ -51,6 +51,10 @@ const userSchema = new mongoose.Schema({
       complementarySkills: { type: Boolean },
     },
   },
+  location:{
+    latitude:{type:Number},
+    longitude:{type:Number}
+  }
 }, 
 {
   timestamps: true,
