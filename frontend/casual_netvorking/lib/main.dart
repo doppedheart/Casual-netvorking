@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Casual Networking',
+      debugShowCheckedModeBanner: false,
       theme: TAppTheme.darkTheme,
       home: WelcomeScreen(),
     );
