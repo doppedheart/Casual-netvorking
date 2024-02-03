@@ -1,34 +1,37 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  username: { type: String, unique: true },
   name: { type: String, required: true },
-  avatar: { type: String },
-  bio: { type: String },
-  timeSpent: { type: Number },
+  email: { type: String, required: true, unique: true },
   age: { type: Number },
   gender: { type: String },
-  occupation: { type: String },
-  years_of_experience: { type: Number },
+  username: { type: String, unique: true },
+  bio: { type: String },
+  avatar: { type: String },
+  timeSpent: { type: Number },
+  profession: { type: String },
   techStack: { type: String },
-  hobbies: { type: String },
-  eventParticipation: { type: [String] },
+  eventParticipated: { type: [String] },
   connections: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
   },
-  techPreferences: {
-    programmingLanguages: { type: [String] },
+  interests: {
+    occupation: { type: [String] },
     frameworksAndTools: { type: [String] },
-    techInterests: { type: [String] },
+    hobbies: { type: [String] },
+    companies: { type: [String] },
   },
-
-  funQuestions: {
+  conversationStarter: {
     icebreakerResponses: { type: [String] },
     pickupLines: { type: [String] },
   },
-
+  socialLinks: {
+    linkedIn: { type: String },
+    github: { type: String },
+    portfolio: { type: String },
+    other: { type: String },
+  },
   /*gamingAndChallenges: {
     highScores: {
       quiz: { score: { type: Number }, timestamp: { type: String } },
@@ -37,12 +40,20 @@ const userSchema = new mongoose.Schema({
   },*/
 
   matchingPreferences: {
-    connectionTypes: { type: [String] },
+    connectionType: { 
+      type: [String],
+      enum: ["collaboration", "casual_networking","friendship", "mentorship", "romantic_relationship",  "professional_relationship", "other"],
+      default: "casual_networking"
+    },
+
     matchingCriteria: {
       similarTechInterests: { type: Boolean },
       complementarySkills: { type: Boolean },
     },
   },
+}, 
+{
+  timestamps: true,
 });
 
 const UserModel = mongoose.model("User", userSchema);
