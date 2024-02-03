@@ -5,6 +5,7 @@ const {
   getUser,
   updateUser,
   getAllUsers,
+  updateLocation,
 } = require("../controllers/user");
 const fs = require("fs");
 router.get("/", async (req, res) => {
@@ -25,5 +26,9 @@ router.post("/:id", async (req, res) => {
   const response = await updateUser(req.params.id, req.body);
   res.send(response);
 });
+router.put("/updateLocation/:id",async(req,res)=>{
+  const response = await updateLocation(req.params.id,req.body);
+  res.send(response);
+}); 
 
 module.exports = router;

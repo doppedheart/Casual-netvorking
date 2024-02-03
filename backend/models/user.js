@@ -51,15 +51,26 @@ const userSchema = new mongoose.Schema({
       complementarySkills: { type: Boolean },
     },
   },
-  location:{
-    latitude:{type:Number},
-    longitude:{type:Number}
-  }
+  location: {
+      type: {
+        type: String, 
+        enum: ['Point'], 
+        default:'Point'
+      },
+      coordinates: {
+        type: [Number],
+        required: true
+      }
+    }
 }, 
 {
   timestamps: true,
 });
 
+userSchema.index({ location: '2dsphere' });
+
 const UserModel = mongoose.model("User", userSchema);
+
+//UserModel.createIndexes({ location: "2dsphere"});
 
 module.exports = UserModel;

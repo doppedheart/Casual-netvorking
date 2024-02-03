@@ -37,7 +37,8 @@ const getOngoingHackathons = async (req, res) => {
 
 const getUpcomingHackathons = async (req, res) => {
   try {
-    const hackathons = await Hackathon.find({ startDate: { $gt: new Date() } });
+    const today=new Date();
+    const hackathons = await Hackathon.find({ startDate: { $gt: today } });
     res.status(200).json(hackathons);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -63,6 +64,8 @@ const insertManyHackathon = async (req, res) => {
     res.status(409).json({ message: error.message });
   }
 };
+
+
 
 module.exports = {
   createHackathon,

@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const userRouter = require("./routes/user");
-// const hackRouter = require("./routes/hackathon");
+const hackRouter = require("./routes/hackathon");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
   res.send("Welcome");
 });
 app.use("/user", userRouter);
-// app.use("/hackathon", hackRouter);
+app.use("/hackathon", hackRouter);
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
