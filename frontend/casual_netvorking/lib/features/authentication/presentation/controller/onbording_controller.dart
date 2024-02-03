@@ -1,11 +1,12 @@
-import 'package:causual_networking/feature/authentication/presentation/screens/login_screen/login_screen.dart';
-import 'package:causual_networking/utils/constants/colors.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../config/text_strings.dart';
 
+import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/image_strings.dart';
+import '../screens/login_screen/login_screen.dart';
 
 class OnbordingController extends GetxController {
   RxInt currentPage = 0.obs;
