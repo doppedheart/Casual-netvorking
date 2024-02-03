@@ -30,10 +30,11 @@ const signup = async (data, images) => {
         );
         console.log(avatar.url);
       }
-    }
+    }//{id , name , email,avatar}
     const user = new User({ avatar: avatar.url, ...data });
     await user.save();
-    return { success: true, message: "User added to Database", data: user };
+    const {id , name} = user;
+    return { success: true, message: "User added to Database", data: {id,name,email,avatar} };
   } catch (error) {
     return { success: false, message: "Internal Server error", data: null };
   }
