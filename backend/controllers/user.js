@@ -134,6 +134,45 @@ const recommendations = async (userId) => {
   }
 };
 
+const fcmStore = async (userId, fcmToken) => {
+  try {
+    const fcm = new FCM({ userId, fcmToken });
+    fcm.save();
+    return { success: true, message: "fcm token added", data: null };
+  } catch (err) {
+    return { success: false, message: "Internal Server error", data: null };
+  }
+};
+
+const sendRequest = async (senderId, recieverId, isPickUpLine) => {
+  console.log("sendRequest");
+  const reciever = FCM.findOne({ user: recieverId });
+  const token = reciever.token;
+  const sender = User.findById(senderId);
+  const message = isPickUpLine
+    ? sender.conversationStarter.pickupLines[0]
+    : sender.conversationStarter.icebreakerResponses[0];
+  const payload = {
+    notification: {
+      title: "Connection Request",
+      subtitle: `from ${sender.name}`,
+      body: message,
+    },
+    token,
+  };
+  firebaseAdmin
+    .messaging()
+    .send(payload)
+    .then((response) => {
+      console.log("Successfully sent message:", response);
+      return { success: true, message: "connection request send", data: null };
+    })
+    .catch((error) => {
+      console.log("Error sending message:", error);
+      return { success: false, message: "Internal Server Error", data: null };
+    });
+};
+
 const acceptRequest = async () => {};
 
 const updateLocation = async (id, data) => {
