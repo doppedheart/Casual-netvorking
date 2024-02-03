@@ -1,4 +1,4 @@
-import 'package:causual_networking/feature/authentication/presentation/screens/user_details/gender_select_screen.dart';
+import 'package:casual_netvorking/features/authentication/presentation/screens/user_details/gender_select_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

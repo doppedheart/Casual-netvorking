@@ -1,9 +1,8 @@
-import 'package:causual_networking/feature/connect/presentation/home_page_screen.dart';
-import 'package:causual_networking/navigation_menu.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 
+import '../../../../../navigation_menu.dart';
 import '../../../../../utils/constants/colors.dart';
 
 class AddProfileDetailPage extends StatelessWidget {

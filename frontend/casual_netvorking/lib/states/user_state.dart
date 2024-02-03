@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 
-import '../feature/authentication/data/repository/authentication_repository_impl.dart';
-import '../feature/authentication/domain/entities/user.dart';
+
+import '../features/authentication/data/repository/authentication_repository_impl.dart';
+import '../features/authentication/domain/entities/user.dart';
 
 
 
