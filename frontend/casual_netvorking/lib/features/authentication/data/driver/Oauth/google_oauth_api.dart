@@ -1,13 +1,14 @@
 import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleOAuthApi {
-
   //creating a new instance of google sign in
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'profile',
-      'email',      
-    ],
+    // clientId: "390044972602-f767u6c91b93jd15402hn51o3bdug93q.apps.googleusercontent.com",
+    // scopes: [
+    //   'profile',
+    //   'email',
+
+    // ],
   );
 
   //function to sign in with google
@@ -59,5 +60,4 @@ class GoogleOAuthApi {
       rethrow;
     }
   }
-
 }

@@ -11,19 +11,19 @@ class TImages {
   static const String facebook = "assets/logos/facebook-icon.png";
 
   // -- OnBoarding Images
-  static const String onboardingImg1 = "assets/img/rafiki.png";
-  static const String onboardingImg2 = "assets/img/new.png";
-  static const String onboardingImg3 = "assets/img/bro.png";
+  static const String onboardingImg1 = "assets/img/svg/rafiki.svg";
+  static const String onboardingImg2 = "assets/img/svg/bro.svg";
+  static const String onboardingImg3 = "assets/img/svg/onboarding_3.svg";
 
   //-- Welcome Screen Images
   static const String welcomeScreenImg =
-      "assets/img/svg/appicon.jpg";
+      "assets/img/Designer__3_-removebg-preview (1).png";
 
   //---------------Login images----------
 
-  static const String googleImg = "assets/img/google (1).png";
-  static const String lindeinImg = "assets/img/linkedin.png";
-  static const String githubImag = "assets/img/github.png";
+  static const String googleImg = "assets/img/svg/google (1).svg";
+  static const String lindeinImg = "assets/img/svg/linkedin.svg";
+  static const String githubImag = "assets/img/svg/github.svg";
 
   //-- signup Screen Images
   static const String signUpScreenIlustrationImg1 =
