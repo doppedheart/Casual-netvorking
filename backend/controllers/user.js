@@ -34,7 +34,7 @@ const signup = async (data, images) => {
     return error;
   }
 };
-const signupFirebase = async (uid){
+const signupFirebase = async (uid)=>{
     try{
     firebaseAdmin.auth().getUser(uid)
         .then(function(userRecord) {
@@ -91,7 +91,7 @@ const updateLocation = async (id, data) => {
       { new: true }
     );
     if (!user) return { message: "User not found" };
-    const hackathon=findHackathon(id,latitude,longitude);
+    const hackathon=await findHackathon(id,latitude,longitude);
     return hackathon;
   } catch (error) {
     return error;
@@ -111,30 +111,27 @@ const findHackathon = async (id,lat, long) => {
         {units:'meters'}
       );
       hackathon.distance=distance;
-      console.log(distance);
       return hackathon;
     });
     result.sort((a, b) => a.distance - b.distance);
-    console.log(result);
-    await result.save();
     if(result.length === 0) return {message: "No hackathon found"};
     //check if the user is already a participant
     const hackathon= result[0];
     const isParticipant = hackathon.participants.includes(id);
-    if(isParticipant){
-      
-      return {message: "User already a participant"};
+    if(!isParticipant){
+      if(hackathon.distance <= maxDistance){
+        hackathon.participants.push(id);
+        await hackathon.save();
+      }
     } 
-    if(hackathon.distance <= maxDistance){
-      hackathon.participants.push(id);
-      await hackathon.save();
-    }
     else{
-      //remove participant
-      if(isParticipant){
+      if(hackathon.distance > maxDistance){
         const index = hackathon.participants.indexOf(id);
         hackathon.participants.splice(index,1);
         await hackathon.save();
+      }
+      else{
+        return {message: "User already a participant and in the hackathon"};
       }
     }
     return result;
