@@ -11,8 +11,8 @@ const signup = async (data, images) => {
     const userExists = await User.findOne({ $or: [{ username }, { email }] });
     if (userExists)
       return {
-        success: false,
-        message: "User with this email or username already exists",
+        success: true,
+        message: "Welcome BACK ",
         data: userExists,
       };
     if (data.avatar) {
@@ -78,12 +78,12 @@ const getUser = async (id) => {
 const updateUser = async (id, data) => {
   try {
     const user = await User.findByIdAndUpdate(id, { ...data }, { new: true });
-    if (!user)
-      return {
-        success: true,
-        message: "User updated successfully",
-        data: user,
-      };
+    if (!user) return { success: false, message: "User not found", data: null };
+    return {
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    };
   } catch (error) {
     return { success: false, message: "Internal Server error", data: null };
   }
