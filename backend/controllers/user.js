@@ -12,7 +12,7 @@ const signup = async (data, images) => {
     if (userExists){
       let {id , name ,avatar} = userExists;
       return {
-        success: false,
+        success: true,
         message: "User with this email or username already exists",
         data: {id,name,email,avatar},
       };
