@@ -10,7 +10,11 @@ const signup = async (data, images) => {
     let avatar = { url: "" };
     const userExists = await User.findOne({ $or: [{ username }, { email }] });
     if (userExists)
-      return { message: "User with this email or username already exists" };
+      return {
+        success: false,
+        message: "User with this email or username already exists",
+        data: userExists,
+      };
     if (data.avatar) {
       avatar.url = data.avatar;
     } else {
@@ -29,9 +33,9 @@ const signup = async (data, images) => {
     }
     const user = new User({ avatar: avatar.url, ...data });
     await user.save();
-    return user;
+    return { success: true, message: "User added to Database", data: user };
   } catch (error) {
-    return error;
+    return { success: false, message: "Internal Server error", data: null };
   }
 };
 // const signupFirebase = async (uid) => {
@@ -54,9 +58,9 @@ const signup = async (data, images) => {
 const getAllUsers = async () => {
   try {
     const users = await User.find({});
-    return users;
+    return { success: true, message: "All Users", data: users };
   } catch (error) {
-    return error;
+    return { success: false, message: "Internal Server error", data: null };
   }
 };
 
@@ -65,19 +69,23 @@ const getUser = async (id) => {
     const user = await User.findOne({
       $and: [{ _id: id }],
     });
-    if (!user) return { message: "User not found" };
-    return user;
+    if (!user) return { success: false, message: "User not found", data: null };
+    return { success: true, message: "User data", data: user };
   } catch (error) {
-    return error;
+    return { success: false, message: "Internal Server error", data: null };
   }
 };
 const updateUser = async (id, data) => {
   try {
     const user = await User.findByIdAndUpdate(id, { ...data }, { new: true });
-    if (!user) return { message: "User not found" };
-    return user;
+    if (!user)
+      return {
+        success: true,
+        message: "User updated successfully",
+        data: user,
+      };
   } catch (error) {
-    return error;
+    return { success: false, message: "Internal Server error", data: null };
   }
 };
 
@@ -85,19 +93,31 @@ const recommendations = async (userId) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return { message: "User not found" };
+      return { success: false, message: "User not found", data: null };
     }
+    const userInterests = user.interests;
     const recommendations = await User.find({
-      "interests.occupation": { $in: userInterests.occupation },
-      "interests.frameworksAndTools": { $in: userInterests.frameworksAndTools },
-      "interests.hobbies": { $in: userInterests.hobbies },
-      "interests.companies": { $in: userInterests.companies },
+      $or: [
+        { "interests.occupation": { $in: userInterests.occupation } },
+        {
+          "interests.frameworksAndTools": {
+            $in: userInterests.frameworksAndTools,
+          },
+        },
+        { "interests.hobbies": { $in: userInterests.hobbies } },
+        { "interests.companies": { $in: userInterests.companies } },
+      ],
       _id: { $ne: user._id }, // Exclude the current user
     });
-    return recommendations;
+
+    return {
+      success: true,
+      message: "User Recommendations",
+      data: recommendations,
+    };
   } catch (err) {
     console.log(err);
-    return { message: "Error occured" };
+    return { success: false, message: "Internal Server error", data: null };
   }
 };
 
@@ -129,7 +149,7 @@ const updateLocation = async (id, data) => {
       { new: true }
     );
     if (!user) return { message: "User not found" };
-    const hackathon=await findHackathon(id,latitude,longitude);
+    const hackathon = await findHackathon(id, latitude, longitude);
     return hackathon;
   } catch (error) {
     return error;
@@ -148,28 +168,26 @@ const findHackathon = async (id, lat, long) => {
         turf.point(location.coordinates),
         { units: "meters" }
       );
-      hackathon.distance=distance;
+      hackathon.distance = distance;
       return hackathon;
     });
     result.sort((a, b) => a.distance - b.distance);
-    if(result.length === 0) return {message: "No hackathon found"};
+    if (result.length === 0) return { message: "No hackathon found" };
     //check if the user is already a participant
     const hackathon = result[0];
     const isParticipant = hackathon.participants.includes(id);
-    if(!isParticipant){
-      if(hackathon.distance <= maxDistance){
+    if (!isParticipant) {
+      if (hackathon.distance <= maxDistance) {
         hackathon.participants.push(id);
         await hackathon.save();
       }
-    } 
-    else{
-      if(hackathon.distance > maxDistance){
+    } else {
+      if (hackathon.distance > maxDistance) {
         const index = hackathon.participants.indexOf(id);
         hackathon.participants.splice(index, 1);
         await hackathon.save();
-      }
-      else{
-        return {message: "User already a participant and in the hackathon"};
+      } else {
+        return { message: "User already a participant and in the hackathon" };
       }
     }
     return result;
@@ -185,4 +203,5 @@ module.exports = {
   getAllUsers,
   updateLocation,
   sendRequest,
+  recommendations,
 };

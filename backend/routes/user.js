@@ -38,7 +38,7 @@ router.put("/updateLocation/:id", async (req, res) => {
   res.send(response);
 });
 
-router.post("/:id/recommendations", async (req, res) => {
+router.get("/:id/recommendations", async (req, res) => {
   const response = await recommendations(req.params.id);
   res.send(response);
 });
