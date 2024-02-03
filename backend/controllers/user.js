@@ -3,7 +3,7 @@ const Hackathon = require("../models/hackathon");
 const turf = require("@turf/turf");
 
 const { uploadToS3 } = require("../middleware");
-const {firebaseAdmin} = require("../middleware")
+const { firebaseAdmin } = require("../middleware");
 const signup = async (data, images) => {
   try {
     const { username, email } = data;
@@ -34,24 +34,23 @@ const signup = async (data, images) => {
     return error;
   }
 };
-const signupFirebase = async (uid)=>{
-    try{
-    firebaseAdmin.auth().getUser(uid)
-        .then(function(userRecord) {
-            // See the UserRecord reference doc for the contents of userRecord
-            console.log('Successfully fetched user data:', userRecord.toJSON());
-            res.status(200).send(userRecord.toJSON());
-        })
-        .catch(function(error) {
-            console.log('Error fetching user data:', error);
-            res.status(500).send('Error fetching user data');
-        });
-    }
-    catch(err){
-        console.log(err);
-    }
-
-}
+// const signupFirebase = async (uid) => {
+//   try {
+//     firebaseAdmin
+//       .auth()
+//       .getUser(uid)
+//       .then(function (userRecord) {
+//         console.log("Successfully fetched user data:", userRecord.toJSON());
+//         return { message: "User added to Database" };
+//       })
+//       .catch(function (error) {
+//         console.log("Error fetching user data:", error);
+//         return "Error fetching user data";
+//       });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
 const getAllUsers = async () => {
   try {
     const users = await User.find({});
@@ -82,12 +81,51 @@ const updateUser = async (id, data) => {
   }
 };
 
+const recommendations = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return { message: "User not found" };
+    }
+    const recommendations = await User.find({
+      "interests.occupation": { $in: userInterests.occupation },
+      "interests.frameworksAndTools": { $in: userInterests.frameworksAndTools },
+      "interests.hobbies": { $in: userInterests.hobbies },
+      "interests.companies": { $in: userInterests.companies },
+      _id: { $ne: user._id }, // Exclude the current user
+    });
+    return recommendations;
+  } catch (err) {
+    console.log(err);
+    return { message: "Error occured" };
+  }
+};
+
+const sendRequest = async () => {
+  console.log("sendRequest");
+  const sendNotification = async (uid, deviceToken, message) => {
+    const user = User.findById(uid);
+    const name = user.username || user.email;
+    const payload = {
+      notification: {
+        title: "Connection Request",
+        subtitle: `from ${name}`,
+        body: message,
+      },
+      token: deviceToken,
+    };
+  };
+  return { message: "connection request send" };
+};
+
+const acceptRequest = async () => {};
+
 const updateLocation = async (id, data) => {
   try {
     const { latitude, longitude } = data;
     const user = await User.findByIdAndUpdate(
       id,
-      {location: { type: 'Point', coordinates: [longitude, latitude] }},
+      { location: { type: "Point", coordinates: [longitude, latitude] } },
       { new: true }
     );
     if (!user) return { message: "User not found" };
@@ -98,17 +136,17 @@ const updateLocation = async (id, data) => {
   }
 };
 
-const findHackathon = async (id,lat, long) => {
+const findHackathon = async (id, lat, long) => {
   try {
-    const  maxDistance = 50;
+    const maxDistance = 50;
     console.log("i was here");
     const hackathons = await Hackathon.find({});
-    const result =  hackathons.map((hackathon)=>{
+    const result = hackathons.map((hackathon) => {
       const { location } = hackathon;
       const distance = turf.distance(
         turf.point([lat, long]),
         turf.point(location.coordinates),
-        {units:'meters'}
+        { units: "meters" }
       );
       hackathon.distance=distance;
       return hackathon;
@@ -116,7 +154,7 @@ const findHackathon = async (id,lat, long) => {
     result.sort((a, b) => a.distance - b.distance);
     if(result.length === 0) return {message: "No hackathon found"};
     //check if the user is already a participant
-    const hackathon= result[0];
+    const hackathon = result[0];
     const isParticipant = hackathon.participants.includes(id);
     if(!isParticipant){
       if(hackathon.distance <= maxDistance){
@@ -127,7 +165,7 @@ const findHackathon = async (id,lat, long) => {
     else{
       if(hackathon.distance > maxDistance){
         const index = hackathon.participants.indexOf(id);
-        hackathon.participants.splice(index,1);
+        hackathon.participants.splice(index, 1);
         await hackathon.save();
       }
       else{
@@ -141,9 +179,10 @@ const findHackathon = async (id,lat, long) => {
 };
 module.exports = {
   signup,
-  signupFirebase,
+  // signupFirebase,
   getUser,
   updateUser,
   getAllUsers,
   updateLocation,
+  sendRequest,
 };

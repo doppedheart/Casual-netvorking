@@ -8,6 +8,7 @@ const {
   getAllUsers,
   updateLocation,
   sendRequest,
+  recommendations,
 } = require("../controllers/user");
 const fs = require("fs");
 router.get("/", async (req, res) => {
@@ -32,13 +33,27 @@ router.post("/:id", async (req, res) => {
   const response = await updateUser(req.params.id, req.body);
   res.send(response);
 });
-router.put("/updateLocation/:id",async(req,res)=>{
-  const response = await updateLocation(req.params.id,req.body);
+router.put("/updateLocation/:id", async (req, res) => {
+  const response = await updateLocation(req.params.id, req.body);
   res.send(response);
-}); 
+});
+
+router.post("/:id/recommendations", async (req, res) => {
+  const response = await recommendations(req.params.id);
+  res.send(response);
+});
+
 router.post("/:id/sendRequest", async (req, res) => {
+  const senderId = req.body.senderId;
   const recieverId = req.body.recieverId;
-  const response = await sendRequest(recieverId);
+  const deviceToken = req.body.deviceToken;
+  const message = req.body.message;
+  const response = await sendRequest(
+    senderId,
+    recieverId,
+    deviceToken,
+    message
+  );
   res.send(response);
 });
 

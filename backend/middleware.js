@@ -6,9 +6,9 @@ var firebaseAdmin = require("firebase-admin");
 
 var serviceAccount = require("./serviceAccountKey.json");
 
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-// });
+firebaseAdmin.initializeApp({
+  credential: firebaseAdmin.credential.cert(serviceAccount),
+});
 
 const client = new S3Client({
   region: "ap-south-1",
