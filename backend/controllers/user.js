@@ -117,7 +117,7 @@ const recommendations = async (userId,page) => {
       return { success: false, message: "User not found", data: null };
     }
     const userInterests = user.interests;
-    const recommendations = await User.find({
+    let recommendations = await User.find({
       $or: [
         { "interests.occupation": { $in: userInterests.occupation } },
         {
@@ -130,8 +130,16 @@ const recommendations = async (userId,page) => {
       ],
       _id: { $ne: user._id }, // Exclude the current user
     }).limit(size).skip(page*size)
+    if(recommendations.length==0){
+      const allRecommendations = await User.find().limit(size).skip(page*size);
+      recommendations = allRecommendations.map((recommendation)=> {
+        if(recommendation._id != userId){
+          return recommendation;
+        }
+      });
+    }
     const newData = recommendations.map((user) => {
-      const { id, avatar,name,age,profession,bio  } = user;
+      const { _id:id, avatar,name,age,profession,bio  } = user;
       return { id, avatar,name,age,profession, bio  };
     });
     return {
