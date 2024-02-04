@@ -60,7 +60,7 @@ router.post("/:id/sendRequest", async (req, res) => {
 
 router.post("/:id/rejectRequest", async (req, res) => {
   const notificationId = req.body.notificationId;
-  const response = await rejectRequest(notificationId,req.params.id);
+  const response = await rejectRequest(notificationId);
   res.send(response);
 });
 

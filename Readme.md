@@ -6,6 +6,7 @@ This project is a social media application specifically designed for developers,
 
 - Connect with developers based on tech stack and field of interest
 - Interact with the community through posts, comments, likes, etc.
+-
 - Secure authentication and connection using Firebase
 
 ## Tech Stack
