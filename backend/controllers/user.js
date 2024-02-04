@@ -1,10 +1,12 @@
 const User = require("../models/user");
 const FCM = require("../models/fcm");
+const Notification = require("../models/notification");
 const Hackathon = require("../models/hackathon");
 const turf = require("@turf/turf");
-
+const mongoose = require("mongoose");
 const { uploadToS3 } = require("../middleware");
 const { firebaseAdmin } = require("../middleware");
+const { name } = require("ejs");
 const signup = async (data, images) => {
   try {
     const { username, email } = data;
@@ -57,12 +59,11 @@ const getAllUsers = async () => {
 
 const getUser = async (id) => {
   try {
-    const user = await User.findOne({
-      $and: [{ _id: id }],
-    });
+    const user = await User.findById(id);
     if (!user) return { success: false, message: "User not found", data: null };
     return { success: true, message: "User data", data: user };
   } catch (error) {
+    console.log(error);
     return { success: false, message: "Internal Server error", data: null };
   }
 };
@@ -158,35 +159,137 @@ const fcmStore = async (userId, fcmToken) => {
 };
 
 const sendRequest = async (senderId, recieverId, isPickUpLine) => {
-  console.log("sendRequest");
-  const reciever = FCM.findOne({ user: recieverId });
-  const token = reciever.token;
-  const sender = User.findById(senderId);
-  const message = isPickUpLine
-    ? sender.conversationStarter.pickupLines[0]
-    : sender.conversationStarter.icebreakerResponses[0];
-  const payload = {
-    notification: {
-      title: "Connection Request",
-      subtitle: `from ${sender.name}`,
-      body: message,
-    },
-    token,
-  };
-  firebaseAdmin
-    .messaging()
-    .send(payload)
-    .then((response) => {
-      console.log("Successfully sent message:", response);
-      return { success: true, message: "connection request send", data: null };
-    })
-    .catch((error) => {
-      console.log("Error sending message:", error);
-      return { success: false, message: "Internal Server Error", data: null };
+  try {
+    console.log("sendRequest");
+    console.log(senderId, recieverId, isPickUpLine);
+    const reciever = await FCM.findOne({ user: recieverId }).populate("user");
+    // console.log("reciever  ", reciever);
+    const token = reciever.token;
+    const sender = await User.findById(senderId);
+    // console.log(sender);
+    const message = isPickUpLine
+      ? sender.conversationStarter.pickupLines[0]
+      : sender.conversationStarter.icebreakerResponses[0];
+
+    const payload = {
+      notification: {
+        title: `Connection Request from ${sender.name}`,
+        body: message,
+      },
+      token,
+    };
+    firebaseAdmin
+      .messaging()
+      .send(payload)
+      .then((response) => {
+        console.log("Successfully sent message:", response);
+      })
+      .catch((error) => {
+        console.log("Error sending message:", error);
+        return { success: false, message: "Internal Server Error", data: null };
+      });
+    const notification = new Notification({
+      sender,
+      reciever,
+      message,
+      name: sender.name,
+      avatar: sender.avatar,
     });
+    await notification.save();
+    reciever.user.notifications.push(notification._id);
+    // console.log(reciever);
+    await reciever.user.save();
+    return { success: true, message: "connection request send", data: null };
+  } catch (error) {
+    console.log("Error sending message:", error);
+    return { success: false, message: "Internal Server Error", data: null };
+  }
 };
 
-const acceptRequest = async () => {};
+const acceptRequest = async (notificationId) => {
+  try {
+    const notification = await Notification.findById(notificationId);
+    if (!notification)
+      return { success: false, message: "Bad request", data: null };
+    const senderId = notification.senderId;
+    const recieverId = notification.recieverId;
+    await Notification.findByIdAndDelete(notificationId);
+    const sender = await User.findByIdAndUpdate(
+      recieverId,
+      { $pull: { notifications: notificationId } },
+      { new: true }
+    );
+    const senderToken = FCM.find({ user: senderId });
+    const reciever = await User.findById(recieverId);
+    sender.connections.push(recieverId);
+    reciever.connections.push(senderId);
+    await sender.save();
+    await reciever.save();
+    const payload = {
+      notification: {
+        title: `Connection accepted from ${sender.name}`,
+      },
+      senderToken,
+    };
+    firebaseAdmin
+      .messaging()
+      .send(payload)
+      .then((response) => {
+        console.log("Successfully sent message:", response);
+        return { success: true, message: "connection accepted", data: null };
+      });
+  } catch (error) {
+    return { success: false, message: "Internal Server Error", data: null };
+  }
+};
+const rejectRequest = async (notificationId) => {
+  try {
+    const notification = await Notification.findById(notificationId);
+    if (!notification)
+      return { success: false, message: "Bad request", data: null };
+    const recieverId = notification.reciever;
+    const reciever = await User.findById(recieverId);
+    console.log(reciever);
+
+    await Notification.findByIdAndDelete(notificationId);
+    sender.notifications.pull(notificationId);
+    await sender.save();
+    console.log("sender", sender);
+    return { success: true, message: "Connection successfully rejected" };
+  } catch (error) {
+    console.log(error);
+    return { success: false, message: "Internal Server Error", data: null };
+  }
+};
+
+const getNotifications = async (id) => {
+  try {
+    const user = await User.findById(id).populate("notifications");
+    const data = user.notifications;
+    return { success: true, message: "User notifications", data };
+  } catch (error) {
+    console.log(error);
+    return { success: false, message: "Internal Server Error", data: null };
+  }
+};
+
+const connections = async (id) => {
+  try {
+    const user = await User.findById(id).populate("connections");
+    const connections = user.connections;
+    connections.map((connection) => {
+      return {
+        _id: connection._id,
+        name: connection.name,
+        avatar: connection.avatar,
+      };
+    });
+    return connections;
+  } catch (error) {
+    console.log(error);
+    return { success: false, message: "Internal Server Error", data: null };
+  }
+};
 
 const updateLocation = async (id, data) => {
   try {
@@ -251,6 +354,7 @@ module.exports = {
   getAllUsers,
   updateLocation,
   sendRequest,
+  rejectRequest,
   recommendations,
   fcmStore,
 };

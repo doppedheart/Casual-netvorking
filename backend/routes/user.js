@@ -8,6 +8,7 @@ const {
   getAllUsers,
   updateLocation,
   sendRequest,
+  rejectRequest,
   recommendations,
   fcmStore,
 } = require("../controllers/user");
@@ -18,7 +19,7 @@ router.get("/", async (req, res) => {
 });
 router.get("/profile/:id", async (req, res) => {
   const id = req.params.id;
-  const response = await getUser({ id });
+  const response = await getUser(id);
   res.send(response);
 });
 router.post("/signup", upload.array("avatar"), async (req, res) => {
@@ -49,16 +50,16 @@ router.post("/:id/fcm", async (req, res) => {
 });
 
 router.post("/:id/sendRequest", async (req, res) => {
-  const senderId = req.body.senderId;
+  const senderId = req.params.id;
   const recieverId = req.body.recieverId;
-  const deviceToken = req.body.deviceToken;
-  const message = req.body.message;
-  const response = await sendRequest(
-    senderId,
-    recieverId,
-    deviceToken,
-    message
-  );
+  const isPickUpLine = req.body.isPickUpLine;
+  const response = await sendRequest(senderId, recieverId, isPickUpLine);
+  res.send(response);
+});
+
+router.post("/:id/rejectRequest", async (req, res) => {
+  const notificationId = req.body.notificationId;
+  const response = await rejectRequest(notificationId);
   res.send(response);
 });
 

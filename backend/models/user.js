@@ -17,6 +17,10 @@ const userSchema = new mongoose.Schema(
     profession: { type: String },
     techStack: { type: String },
     eventParticipated: { type: [String] },
+    notifications: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Notification",
+    },
     connections: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "User",
