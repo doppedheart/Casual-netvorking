@@ -259,19 +259,19 @@ const acceptRequest = async (notificationId) => {
     return { success: false, message: "Internal Server Error", data: null };
   }
 };
-const rejectRequest = async (notificationId) => {
+const rejectRequest = async (notificationId,id) => {
   try {
     const notification = await Notification.findById(notificationId);
     if (!notification)
       return { success: false, message: "Bad request", data: null };
-    const recieverId = notification.reciever;
-    const reciever = await User.findById(recieverId);
+    const reciever = await User.findById(id);
     console.log(reciever);
 
     await Notification.findByIdAndDelete(notificationId);
-    sender.notifications.pull(notificationId);
-    await sender.save();
-    console.log("sender", sender);
+    const index = reciever.notifications.indexOf(id);
+    reciever.notifications.splice(index, 1);
+    await reciever.save();
+    console.log("sender", reciever);
     return { success: true, message: "Connection successfully rejected" };
   } catch (error) {
     console.log(error);
