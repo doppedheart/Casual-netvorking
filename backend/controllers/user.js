@@ -132,12 +132,16 @@ const recommendations = async (userId,page) => {
     }).limit(size).skip(page*size)
     if(recommendations.length==0){
       const allRecommendations = await User.find().limit(size).skip(page*size);
+      if(allRecommendations.length==0){
+        return { success: false, message: "No recommendations found", data: null };
+      }
       recommendations = allRecommendations.map((recommendation)=> {
         if(recommendation._id != userId){
           return recommendation;
         }
       });
     }
+    
     const newData = recommendations.map((user) => {
       const { _id:id, avatar,name,age,profession,bio  } = user;
       return { id, avatar,name,age,profession, bio  };
