@@ -80,44 +80,46 @@ const updateUser = async (id, data) => {
     return { success: false, message: "Internal Server error", data: null };
   }
 };
-const updateImage = async (id, image) => {
+const updateImage = async (id, images) => {
   try {
     let avatar = { url: "" };
-    if (image.length !== 0) {
-      const image = image[0].originalname;
+    if (images.length !== 0) {
+      console.log(images)
+      const image = images.originalname;
       const filename =
         image.split(".")[0] + "_" + Date.now() + "." + image.split(".")[1];
+      console.log(filename);
       avatar = await uploadToS3(
         process.env.S3_BUCKET_NAME,
         filename,
-        image[0].path,
-        image[0].mimetype
+        images.path,
+        images.mimetype
       );
       console.log(avatar.url);
     }
-    const user = await User.findByIdAndUpdate(
-      id,
-      { avatar: avatar.url },
-      { new: true }
-    );
+    const user = await User.findById(id)
+    user.gallery.push(avatar.url);
+    await user.save();
     return {
       success: true,
       message: "Image successfully updated",
-      data: avatar.url,
+      avatar: avatar.url,
     };
   } catch (error) {
+    console.log(error)
     return { success: false, message: "Internal Server error", data: null };
   }
 };
 
-const recommendations = async (userId) => {
+const recommendations = async (userId,page) => {
   try {
     const user = await User.findById(userId);
+    let size=5;
     if (!user) {
       return { success: false, message: "User not found", data: null };
     }
     const userInterests = user.interests;
-    const recommendations = await User.find({
+    let recommendations = await User.find({
       $or: [
         { "interests.occupation": { $in: userInterests.occupation } },
         {
@@ -129,12 +131,27 @@ const recommendations = async (userId) => {
         { "interests.companies": { $in: userInterests.companies } },
       ],
       _id: { $ne: user._id }, // Exclude the current user
+    }).limit(size).skip(page*size)
+    if(recommendations.length==0){
+      const allRecommendations = await User.find().limit(size).skip(page*size);
+      if(allRecommendations.length==0){
+        return { success: false, message: "No recommendations found", data: null };
+      }
+      recommendations = allRecommendations.map((recommendation)=> {
+        if(recommendation._id != userId){
+          return recommendation;
+        }
+      });
+    }
+    
+    const newData = recommendations.map((user) => {
+      const { _id:id, avatar,name,age,profession,bio  } = user;
+      return { id, avatar,name,age,profession, bio  };
     });
-
     return {
       success: true,
       message: "User Recommendations",
-      data: recommendations,
+      data: newData,
     };
   } catch (err) {
     console.log(err);

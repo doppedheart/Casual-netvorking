@@ -72,6 +72,9 @@ const userSchema = new mongoose.Schema(
       latitude: { type: Number },
       longitude: { type: Number },
     },
+    gallery:{
+      type:[String]
+    }
   },
   {
     timestamps: true,
