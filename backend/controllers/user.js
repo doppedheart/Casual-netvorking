@@ -109,9 +109,10 @@ const updateImage = async (id, image) => {
   }
 };
 
-const recommendations = async (userId) => {
+const recommendations = async (userId,page) => {
   try {
     const user = await User.findById(userId);
+    let size=5;
     if (!user) {
       return { success: false, message: "User not found", data: null };
     }
@@ -128,12 +129,15 @@ const recommendations = async (userId) => {
         { "interests.companies": { $in: userInterests.companies } },
       ],
       _id: { $ne: user._id }, // Exclude the current user
+    }).limit(size).skip(page*size)
+    const newData = recommendations.map((user) => {
+      const { id, avatar,name,age,profession,bio  } = user;
+      return { id, avatar,name,age,profession, bio  };
     });
-
     return {
       success: true,
       message: "User Recommendations",
-      data: recommendations,
+      data: newData,
     };
   } catch (err) {
     console.log(err);

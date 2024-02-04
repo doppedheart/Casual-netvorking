@@ -40,7 +40,7 @@ router.put("/updateLocation/:id", async (req, res) => {
 });
 
 router.get("/:id/recommendations", async (req, res) => {
-  const response = await recommendations(req.params.id);
+  const response = await recommendations(req.params.id,req.query.page);
   res.send(response);
 });
 router.post("/:id/fcm", async (req, res) => {
