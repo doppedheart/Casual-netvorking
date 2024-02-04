@@ -79,32 +79,33 @@ const updateUser = async (id, data) => {
     return { success: false, message: "Internal Server error", data: null };
   }
 };
-const updateImage = async (id, image) => {
+const updateImage = async (id, images) => {
   try {
     let avatar = { url: "" };
-    if (image.length !== 0) {
-      const image = image[0].originalname;
+    if (images.length !== 0) {
+      console.log(images)
+      const image = images.originalname;
       const filename =
         image.split(".")[0] + "_" + Date.now() + "." + image.split(".")[1];
+      console.log(filename);
       avatar = await uploadToS3(
         process.env.S3_BUCKET_NAME,
         filename,
-        image[0].path,
-        image[0].mimetype
+        images.path,
+        images.mimetype
       );
       console.log(avatar.url);
     }
-    const user = await User.findByIdAndUpdate(
-      id,
-      { avatar: avatar.url },
-      { new: true }
-    );
+    const user = await User.findById(id)
+    user.gallery.push(avatar.url);
+    await user.save();
     return {
       success: true,
       message: "Image successfully updated",
-      data: avatar.url,
+      avatar: avatar.url,
     };
   } catch (error) {
+    console.log(error)
     return { success: false, message: "Internal Server error", data: null };
   }
 };

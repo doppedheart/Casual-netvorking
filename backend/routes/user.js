@@ -32,9 +32,10 @@ router.post("/:id", async (req, res) => {
 });
 router.post("/:id/image", upload.array("avatar"), async (req, res) => {
   const response = await updateImage(req.params.id, req.files[0]);
+  if (req.files.length !== 0) fs.unlinkSync(req.files[0].path);
   res.send(response);
 });
-router.put("/updateLocation/:id", async (req, res) => {
+router.post("/updateLocation/:id", async (req, res) => {
   const response = await updateLocation(req.params.id, req.body);
   res.send(response);
 });
