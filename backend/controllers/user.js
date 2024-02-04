@@ -15,7 +15,7 @@ const signup = async (data, images) => {
       return {
         success: true,
         message: "User with this email or username already exists",
-        data: { id, name, email, avatar },
+        data: { id, name, email, avatar, isComplete: true },
       };
     }
     if (data.avatar) {
@@ -143,7 +143,13 @@ const recommendations = async (userId) => {
 
 const fcmStore = async (userId, fcmToken) => {
   try {
-    const fcm = new FCM({ userId, fcmToken });
+    const fcmExists = await FCM.findOne({ user: userId });
+    if (fcmExists) {
+      fcmExists.token = fcmToken;
+      fcmExists.save();
+      return { success: true, message: "fcm token updated", data: null };
+    }
+    const fcm = new FCM({ user: userId, token: fcmToken });
     fcm.save();
     return { success: true, message: "fcm token added", data: null };
   } catch (err) {
