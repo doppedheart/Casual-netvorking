@@ -51,7 +51,11 @@ const signup = async (data, images) => {
 const getAllUsers = async () => {
   try {
     const users = await User.find({});
-    return { success: true, message: "All Users", data: users };
+    data = users.map((user) => {
+      const { _id: id, avatar, name, age, profession, bio } = user;
+      return { id, avatar, name, age, profession, bio };
+    });
+    return { success: true, message: "All Users", data };
   } catch (error) {
     return { success: false, message: "Internal Server error", data: null };
   }
@@ -84,7 +88,7 @@ const updateImage = async (id, images) => {
   try {
     let avatar = { url: "" };
     if (images.length !== 0) {
-      console.log(images)
+      console.log(images);
       const image = images.originalname;
       const filename =
         image.split(".")[0] + "_" + Date.now() + "." + image.split(".")[1];
@@ -97,7 +101,7 @@ const updateImage = async (id, images) => {
       );
       console.log(avatar.url);
     }
-    const user = await User.findById(id)
+    const user = await User.findById(id);
     user.gallery.push(avatar.url);
     await user.save();
     return {
@@ -106,15 +110,15 @@ const updateImage = async (id, images) => {
       avatar: avatar.url,
     };
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return { success: false, message: "Internal Server error", data: null };
   }
 };
 
-const recommendations = async (userId,page) => {
+const recommendations = async (userId, page) => {
   try {
     const user = await User.findById(userId);
-    let size=5;
+    let size = 5;
     if (!user) {
       return { success: false, message: "User not found", data: null };
     }
@@ -131,22 +135,30 @@ const recommendations = async (userId,page) => {
         { "interests.companies": { $in: userInterests.companies } },
       ],
       _id: { $ne: user._id }, // Exclude the current user
-    }).limit(size).skip(page*size)
-    if(recommendations.length==0){
-      const allRecommendations = await User.find().limit(size).skip(page*size);
-      if(allRecommendations.length==0){
-        return { success: false, message: "No recommendations found", data: null };
+    })
+      .limit(size)
+      .skip(page * size);
+    if (recommendations.length == 0) {
+      const allRecommendations = await User.find()
+        .limit(size)
+        .skip(page * size);
+      if (allRecommendations.length == 0) {
+        return {
+          success: false,
+          message: "No recommendations found",
+          data: null,
+        };
       }
-      recommendations = allRecommendations.map((recommendation)=> {
-        if(recommendation._id != userId){
+      recommendations = allRecommendations.map((recommendation) => {
+        if (recommendation._id != userId) {
           return recommendation;
         }
       });
     }
-    
+
     const newData = recommendations.map((user) => {
-      const { _id:id, avatar,name,age,profession,bio  } = user;
-      return { id, avatar,name,age,profession, bio  };
+      const { _id: id, avatar, name, age, profession, bio } = user;
+      return { id, avatar, name, age, profession, bio };
     });
     return {
       success: true,
@@ -183,36 +195,37 @@ const sendRequest = async (senderId, recieverId, isPickUpLine) => {
     // console.log("reciever  ", reciever);
     const token = reciever.token;
     const sender = await User.findById(senderId);
-    // console.log(sender);
+    console.log(sender);
     const message = isPickUpLine
       ? sender.conversationStarter.pickupLines[0]
       : sender.conversationStarter.icebreakerResponses[0];
 
-    const payload = {
-      notification: {
-        title: `Connection Request from ${sender.name}`,
-        body: message,
-      },
-      token,
-    };
-    firebaseAdmin
-      .messaging()
-      .send(payload)
-      .then((response) => {
-        console.log("Successfully sent message:", response);
-      })
-      .catch((error) => {
-        console.log("Error sending message:", error);
-        return { success: false, message: "Internal Server Error", data: null };
-      });
+    // const payload = {
+    //   notification: {
+    //     title: `Connection Request from ${sender.name}`,
+    //     body: message,
+    //   },
+    //   token,
+    // };
+    // firebaseAdmin
+    //   .messaging()
+    //   .send(payload)
+    //   .then((response) => {
+    //     console.log("Successfully sent message:", response);
+    //   })
+    //   .catch((error) => {
+    //     console.log("Error sending message:", error);
+    //     return { success: false, message: "Internal Server Error", data: null };
+    //   });
     const notification = new Notification({
-      sender,
-      reciever,
+      sender: sender._id,
+      reciever: reciever._id,
       message,
       name: sender.name,
       avatar: sender.avatar,
     });
     await notification.save();
+    console.log(notification);
     reciever.user.notifications.push(notification._id);
     // console.log(reciever);
     await reciever.user.save();
@@ -223,21 +236,23 @@ const sendRequest = async (senderId, recieverId, isPickUpLine) => {
   }
 };
 
-const acceptRequest = async (notificationId) => {
+const acceptRequest = async (notificationId, recieverId) => {
   try {
-    const notification = await Notification.findById(notificationId);
+    const notification = await Notification.findById(
+      notificationId,
+      recieverId
+    );
     if (!notification)
       return { success: false, message: "Bad request", data: null };
-    const senderId = notification.senderId;
-    const recieverId = notification.recieverId;
-    await Notification.findByIdAndDelete(notificationId);
-    const sender = await User.findByIdAndUpdate(
-      recieverId,
-      { $pull: { notifications: notificationId } },
-      { new: true }
+    const senderId = notification.sender;
+    const reciever = await User.updateOne(
+      { _id: new mongoose.Types.ObjectId(recieverId) },
+      {
+        $pull: { notifications: new mongoose.Types.ObjectId(notificationId) },
+      }
     );
+    await Notification.findByIdAndDelete(notificationId);
     const senderToken = FCM.find({ user: senderId });
-    const reciever = await User.findById(recieverId);
     sender.connections.push(recieverId);
     reciever.connections.push(senderId);
     await sender.save();
@@ -259,19 +274,18 @@ const acceptRequest = async (notificationId) => {
     return { success: false, message: "Internal Server Error", data: null };
   }
 };
-const rejectRequest = async (notificationId) => {
+const rejectRequest = async (notificationId, recieverId) => {
   try {
     const notification = await Notification.findById(notificationId);
     if (!notification)
       return { success: false, message: "Bad request", data: null };
-    const recieverId = notification.reciever;
-    const reciever = await User.findById(recieverId);
+    const reciever = await User.updateOne(
+      { _id: new mongoose.Types.ObjectId(recieverId) },
+      {
+        $pull: { notifications: new mongoose.Types.ObjectId(notificationId) },
+      }
+    );
     console.log(reciever);
-
-    await Notification.findByIdAndDelete(notificationId);
-    sender.notifications.pull(notificationId);
-    await sender.save();
-    console.log("sender", sender);
     return { success: true, message: "Connection successfully rejected" };
   } catch (error) {
     console.log(error);
@@ -371,6 +385,7 @@ module.exports = {
   getAllUsers,
   updateLocation,
   sendRequest,
+  acceptRequest,
   rejectRequest,
   recommendations,
   fcmStore,
