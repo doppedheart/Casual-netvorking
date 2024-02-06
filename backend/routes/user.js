@@ -14,6 +14,9 @@ const {
   recommendations,
   fcmStore,
 } = require("../controllers/user");
+
+const {getUserForRecommendation} = require("../controllers/getUser");
+
 const fs = require("fs");
 router.get("/", async (req, res) => {
   const response = await getAllUsers();
@@ -76,4 +79,9 @@ router.get("/:id/notifications", async (req, res) => {
   res.send(response);
 });
 
+
+router.get("/:id/getUserForRecommendation", async (req, res) => {
+  const response = await getUserForRecommendation(req.params.id);
+  res.send(response);
+});
 module.exports = router;
