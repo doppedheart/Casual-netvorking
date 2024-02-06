@@ -8,7 +8,9 @@ const {
   getAllUsers,
   updateLocation,
   sendRequest,
+  acceptRequest,
   rejectRequest,
+  getNotifications,
   recommendations,
   fcmStore,
 } = require("../controllers/user");
@@ -42,7 +44,7 @@ router.post("/updateLocation/:id", async (req, res) => {
 });
 
 router.get("/:id/recommendations", async (req, res) => {
-  const response = await recommendations(req.params.id,req.query.page);
+  const response = await recommendations(req.params.id, req.query.page);
   res.send(response);
 });
 router.post("/:id/fcm", async (req, res) => {
@@ -57,10 +59,20 @@ router.post("/:id/sendRequest", async (req, res) => {
   const response = await sendRequest(senderId, recieverId, isPickUpLine);
   res.send(response);
 });
+router.post("/:id/acceptRequest", async (req, res) => {
+  const recieverId = req.params.id;
+  const notificationId = req.body.notificationId;
+  const response = await acceptRequest(notificationId, recieverId);
+  res.send(response);
+});
 
 router.post("/:id/rejectRequest", async (req, res) => {
   const notificationId = req.body.notificationId;
   const response = await rejectRequest(notificationId);
+  res.send(response);
+});
+router.get("/:id/notifications", async (req, res) => {
+  const response = await getNotifications(req.params.id);
   res.send(response);
 });
 
